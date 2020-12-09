@@ -1,0 +1,59 @@
+server:
+  port: 9009
+spring:
+  application:
+    name: gateway-zuul
+  redis:
+    port: 6379
+    host: 192.168.3.136
+zuul:
+  retryable: true
+  ribbon:
+    ConnectTimeout: 250 # 连接超时时间(ms)
+    ReadTimeout: 2000 # 通信超时时间(ms)
+    OkToRetryOnAllOperations: true # 是否对所有操作重试
+    MaxAutoRetriesNextServer: 1 # 同一服务不同实例的重试次数
+    MaxAutoRetries: 0 # 同一实例的重试次数
+  routes:
+    #简写访问路径配置
+#    demo-server: /demo-service/** # 这里是自己指定的映射路径
+    #为微服务定制访问路径
+    city-server: # 这里是路由id，随意写
+      path: /city/** # 这里是映射路径
+      #url: http://127.0.0.1:8086 # 映射路径对应的实际url地址
+      serviceId: demo-service # 指定服务名称
+      strip-prefix: false #不去除city前缀
+  #Zuul限流配置
+  ratelimit:
+    enabled: true #打开限流机制
+    repository: REDIS
+    default-policy-list: #系统的默认限流策略,对zuul代理的所有服务生效
+      - limit: 3 #一个窗口不能超3个请求
+        quota: 3 #一个请求到达服务器和响应所占时间
+        refresh-interval: 10   #一个窗口期
+        type: #限流的类，url,user,role
+          - url
+    #针对特定的服务配置限流规则
+    policy-list:
+      demo-service: #serviceId服务的名字
+        - limit: 6
+          quota: 3
+          refresh-interval: 10
+          type:
+            - url
+
+#  ignored-services: #指定对外不公开的服务列表
+#    - city-service
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMillisecond: 6000 # 熔断超时时长：6000ms
+#ribbon的总超时时长最好小于hystrix的超时时长哦，否则就会hystix熔断，ribbon没有重试机会了。
+#ribbonOuttime=（ConnectTimeout+ReadTimeout）×2 可参见AbstractRibbonCommand.java源码
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:9999/eureka

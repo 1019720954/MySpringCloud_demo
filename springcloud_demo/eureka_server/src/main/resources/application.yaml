@@ -1,0 +1,10 @@
+server:
+  port: 9999
+eureka:
+  client:
+    register-with-eureka: false
+    service-url:
+      defaultZone: http://127.0.0.1:9999/eureka
+spring:
+  application:
+    name: erueka-server

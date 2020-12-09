@@ -1,0 +1,19 @@
+server:
+  port: 8086
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3305/test1
+    password: root
+    username: root
+  application:
+    name: demo-service
+mybatis:
+  type-aliases-package: com.gyb.pojo
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+eureka:
+  client:
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://127.0.0.1:9999/eureka
