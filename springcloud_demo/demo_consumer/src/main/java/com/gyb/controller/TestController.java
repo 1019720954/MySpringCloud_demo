@@ -80,9 +80,11 @@ public class TestController {
 //        return "不好意思，网络走丢了~~~";
 //    }
     /**
-     * @HystrixCommand(fallbackMethod = "CallCityInfoFallback",commandProperties = {
-     *             @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value="3000")
-     *     })
+     * @@HystrixCommand(fallbackMethod = "CallCityInfoFallback",commandProperties = {
+     *            @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold",value="10"),//断路器请求次数
+     *            @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage",value="60"),//失败比例
+     *            @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds",value="10000")//休眠时间
+     *    })
      * 指定特殊的业务需要调整hystrix的超时时间
      */
 //    @RequestMapping("/{id}")
@@ -101,8 +103,16 @@ public class TestController {
 //    }
     @Autowired
     private CityFeignClient cityFeignClient;
+    /**
+     * 通过fegin来简化服务的远程调用
+     * fegin自动集成了Ribbon和Hystrix
+     * 但需要自己编写Client接口并指定和编写fallback方法(详情参见CityFeignClient接口与CityFeignFallback类)
+     * 需要在yaml文件中配置熔断开启
+     * (feign:
+     *   hystrix:
+     *     enabled: true # 开启Feign的熔断功能)
+     */
     @RequestMapping("/{id}")
-    @HystrixCommand
     public CityInfo CallCityInfo(@PathVariable("id") Integer id){
         return cityFeignClient.getCity(id);
     }
